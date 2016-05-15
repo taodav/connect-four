@@ -37,14 +37,15 @@ Board.prototype.checkDiagonal = function(circle){
   var positionX = findStartingX(circle)
   var positionY = findStartingY(circle)
   for (var i = 0; i < findLength(positionY, positionX); i++){
-    console.log(this.columns[positionX + i].circles[positionY + i])
+        console.log(this.columns[positionX + i].circles[positionY + i])
+
       if (this.columns[positionX + i].circles[positionY + i]){
+        console.log(this.columns[positionX + i].circles[positionY + i])
         diagonalLeft[i] = this.columns[positionX + i].circles[positionY + i]
       }
       else {
         diagonalLeft[i] = new Circle({x: 0, y: 0, color: NaN})
       }
-      
   }
   if (checkSingleArray(diagonalLeft) || checkSingleArray(diagonalRight)){
     return true
