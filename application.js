@@ -32,47 +32,81 @@ Board.prototype.checkColumns = function(circle){
   }
 }
 Board.prototype.checkDiagonal = function(circle){
-  var diagonalLeft = []
-  var diagonalRight = []
-  var positionX = findStartingX(circle)
-  var positionY = findStartingY(circle)
-  for (var i = 0; i < findLength(positionY, positionX); i++){
-    console.log(this.columns[positionX + i].circles[positionY + i])
-      if (this.columns[positionX + i].circles[positionY + i]){
-        diagonalLeft[i] = this.columns[positionX + i].circles[positionY + i]
-      }
-      else {
-        diagonalLeft[i] = new Circle({x: 0, y: 0, color: NaN})
-      }
-      
-  }
+  var positionLeftX = findStartingLeft(circle.posX, circle.posY)
+  var positionLeftY = findStartingLeft(circle.posY, circle.posX)
+  var positionRightX = findStartingRightX(circle.posX, circle.posY)
+  var positionRightY = findStartingRightY(circle.posX, circle.posY)
+  var diagonalLeft = diagonalOneSide(this, circle, positionLeftX, positionLeftY, 'left')
+  var diagonalRight = diagonalOneSide(this, circle, positionRightX, positionRightY, 'right')
+
   if (checkSingleArray(diagonalLeft) || checkSingleArray(diagonalRight)){
+    return true
+  }
+}
+
+function diagonalOneSide(board, circle, x, y, option){
+  var diagonalSide = []
+  var right = 0
+  if (option == 'right'){
+    right = 1
+  }
+  for (var i = 0; i < findLength(y, x)+right; i++){
+    if (option == 'left') {
+      var increment = x + i
+    }
+    else {
+      var increment = x - i
+    }
+    if (board.columns[increment].circles.some(function(circle){return includeCircle(circle, increment, y + i)})){
+      diagonalSide[i] = board.columns[increment].circles.find(function(circle){return includeCircle(circle, increment, y + i)})
+    }
+    else {
+      diagonalSide[i] = new Circle({x: 0, y: 0, color: NaN})
+    }
+  }
+  console.log(diagonalSide)
+  return diagonalSide
+}
+
+
+function includeCircle(circle, x, y){
+  if (circle.posY == y && circle.posX == x){
     return true
   }
 }
 
 function findLength(y, x){
   var length = 0
-  if (y-x < 0){
+  var difference = y-x
+  if (difference < 0){
     length += 1
   }
-  
-  length += (6 - (y + x))
+
+  length += (6 - Math.abs(y - x))
   return length
 }
 
-function findStartingY(circle){
-  if (circle.posY-circle.posX >= 0) {
-    return circle.posY - circle.posX
+function findStartingRightX(x, y){
+  if (x+y > 6){
+    return 6
   }
   else {
-    return 0
+    return x+y
   }
 }
 
-function findStartingX(circle){
-  if (circle.posX-circle.posY >= 0) {
-    return circle.posX-circle.posY
+function findStartingRightY(x, y){
+  if (x+y < 6){
+    return 0
+  }
+  else {
+    return (x+y)-6
+  }
+}
+
+function findStartingLeft(x, y){
+  if (x-y >= 0) {
+    return x-y
   }
   else {
     return 0
@@ -106,9 +140,9 @@ function checkSingleArray(array){
         count++
         if (count == 3){
           result = true
-          console.log(arrayOfColors[i].toUpperCase())
+          alert(arrayOfColors[i].toUpperCase() + " WINS")
           break
-        } 
+        }
       }
       else {
         result = false
@@ -141,7 +175,7 @@ function Circle(args) {
 }
 
 function newCircle(column, board, row) {
-  var circle = new Circle({x: column, y: row, color: color()})
+  var circle = new Circle({x: parseInt(column), y: row, color: color()})
   board.columns[column].circles.push(circle)
   return circle
 }
