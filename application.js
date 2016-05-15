@@ -14,38 +14,69 @@ $(document).ready(function() {
     var row = 5 - extra
     var circle = newCircle(column, board, row)
     board.addCircle(circle)
+    board.checkDiagonal()
     board.checkWin()
   })
 })
 
 Board.prototype.checkWin = function () {
-  checkColumns(this)
-  checkRow(this)
-  checkDiagonal(this)
-}
-
-function checkColumns(board){
-  board.columns.forEach(checkSingleColumn)
-}
-
-function checkSingleColumn(column){
-  var offSet = 0
-  return function(){
-    var start = offset, len = this.length
-    for (var i = start; i < len; i++){
-
-    }
+  if (this.checkColumns() || this.checkRows() || this.checkDiagonal()){
+    this.win = true
+    console.log("YOU WIN")
   }
 }
 
-function checkRow(board){
-
+Board.prototype.checkColumns = function(){
+  return this.columns.some(function(column){
+    if (column.circles.length >=4 && checkSingleArray(column.circles))
+      return true
+  })
+}
+Board.prototype.checkDiagonal = function(){
++
 }
 
-function checkDiagonal(board){
-
+Board.prototype.checkRows = function(){
+  var allRows = []
+  for (var i = 6; i > 0; i-=1){
+    var currentRow = []
+    this.columns.forEach(function(column){
+      if (column.circles[i-1]){
+        currentRow.push(column.circles[i-1])
+      }
+    })
+    allRows.push(currentRow)
+    var cleanRows = allRows.filter(function(circles){return circles.length !== 0;})
+  }
+  return cleanRows.some(function(row){
+    if (row.length >= 4 && checkSingleArray(row)){
+      return true
+    }
+  })
 }
 
+function checkSingleArray(array){
+  var arrayOfColors = []
+  array.forEach(function(circle){arrayOfColors.push(circle.color)})
+  var result = false
+  var count = 0
+  if (arrayOfColors.length != 0){
+    for (var i = 0; i < arrayOfColors.length; i++){
+      if (arrayOfColors[i-1] == arrayOfColors[i]){
+        count++
+        if (count == 3){
+          result = true
+          console.log(arrayOfColors[i].toUpperCase())
+          break
+        } 
+      }
+      else {
+        result = false
+      }
+    }
+  }
+  return result
+}
 
 function initializeColumns(board) {
   for (var i = 0; i < 7; i++){
@@ -88,9 +119,9 @@ function flip() {
 
 function color() {
   var color = "red"
-    if (flip()){
-      color = "blue"
-    }
+  if (flip()){
+    color = "blue"
+  }
   return color
 }
 
