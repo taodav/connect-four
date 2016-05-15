@@ -14,45 +14,85 @@ $(document).ready(function() {
     var row = 5 - extra
     var circle = newCircle(column, board, row)
     board.addCircle(circle)
-    board.checkDiagonal()
-    board.checkWin()
+    board.checkWin(circle)
   })
 })
 
-Board.prototype.checkWin = function () {
-  if (this.checkColumns() || this.checkRows() || this.checkDiagonal()){
+Board.prototype.checkWin = function (circle) {
+  if (this.checkColumns(circle) || this.checkRows(circle) || this.checkDiagonal(circle)){
     this.win = true
     console.log("YOU WIN")
   }
 }
 
-Board.prototype.checkColumns = function(){
-  return this.columns.some(function(column){
-    if (column.circles.length >=4 && checkSingleArray(column.circles))
-      return true
-  })
+Board.prototype.checkColumns = function(circle){
+  var column = this.columns[circle.posX]
+  if (column.circles.length >=4 && checkSingleArray(column.circles)){
+    return true
+  }
 }
-Board.prototype.checkDiagonal = function(){
-+
+Board.prototype.checkDiagonal = function(circle){
+  var diagonalLeft = []
+  var diagonalRight = []
+  var positionX = findStartingX(circle)
+  var positionY = findStartingY(circle)
+  for (var i = 0; i < findLength(positionY, positionX); i++){
+    console.log(this.columns[positionX + i].circles[positionY + i])
+      if (this.columns[positionX + i].circles[positionY + i]){
+        diagonalLeft[i] = this.columns[positionX + i].circles[positionY + i]
+      }
+      else {
+        diagonalLeft[i] = new Circle({x: 0, y: 0, color: NaN})
+      }
+      
+  }
+  if (checkSingleArray(diagonalLeft) || checkSingleArray(diagonalRight)){
+    return true
+  }
 }
 
-Board.prototype.checkRows = function(){
-  var allRows = []
-  for (var i = 6; i > 0; i-=1){
-    var currentRow = []
-    this.columns.forEach(function(column){
-      if (column.circles[i-1]){
-        currentRow.push(column.circles[i-1])
-      }
-    })
-    allRows.push(currentRow)
-    var cleanRows = allRows.filter(function(circles){return circles.length !== 0;})
+function findLength(y, x){
+  var length = 0
+  if (y-x < 0){
+    length += 1
   }
-  return cleanRows.some(function(row){
-    if (row.length >= 4 && checkSingleArray(row)){
-      return true
+  
+  length += (6 - (y + x))
+  return length
+}
+
+function findStartingY(circle){
+  if (circle.posY-circle.posX >= 0) {
+    return circle.posY - circle.posX
+  }
+  else {
+    return 0
+  }
+}
+
+function findStartingX(circle){
+  if (circle.posX-circle.posY >= 0) {
+    return circle.posX-circle.posY
+  }
+  else {
+    return 0
+  }
+}
+
+
+Board.prototype.checkRows = function(circle){
+  var currentRow = []
+  this.columns.forEach(function(column){
+    if (column.circles[5-circle.posY]){
+      currentRow.push(column.circles[5-circle.posY])
+    }
+    else {
+      currentRow.push(new Circle({x: 0, y: 0, color: NaN}))
     }
   })
+  if (currentRow.length >= 4 && checkSingleArray(currentRow)){
+    return true
+  }
 }
 
 function checkSingleArray(array){
@@ -103,7 +143,6 @@ function Circle(args) {
 function newCircle(column, board, row) {
   var circle = new Circle({x: column, y: row, color: color()})
   board.columns[column].circles.push(circle)
-
   return circle
 }
 
